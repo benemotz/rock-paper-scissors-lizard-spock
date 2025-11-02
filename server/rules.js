@@ -37,8 +37,8 @@ const rules = {
 export default function getOutcome(p1, p2) {
   if (p1 === p2) return { result: "Draw", rule: "It's a tie!" };
   if (rules[p1].oppositions.includes(p2)) {
-    return { result: "Win", rule: rules[p1].solutions[p2] };
+    return { result: "Win", rule: rules[p1].ruleTexts[p2] };
   } else {
-    return { result: "Lose", rule: rules[p2].solutions[p1] };
+    return { result: "Lose", rule: rules[p2].ruleTexts[p1] };
   }
 }
