@@ -29,35 +29,58 @@ npm run dev (remove the lock file in .next/dev/lock, this will enable to run npm
 
 Open app in browser and go to http://localhost:3000
 
-## Architecture
+## Architecture Overview
 
-CLIENT (React + Next.js)
- ├── socketActions (emit events)
- │    ├── sendMove() → emits "player_move"
- │    ├── startNewRound() → emits "new_round"
- │    ├── disconnectPlayer() → calls socket.disconnect()
- │    └── registerPlayer() → emits "register_player"
- │
- ├── useEffect (listen for events)
- │    ├── "round_result" → update result UI
- │    ├── "new_round" → reset UI
- │    ├── "current_players" → update player list
- │    └── "player_disconnected" → show disconnect message
- │
- └── UI renders based on `playerState`
+### **Client (React + Next.js)**
+- **socketActions** (emits events to server):
+  - `sendMove()` → emits **`player_move`**
+  - `startNewRound()` → emits **`new_round`**
+  - `disconnectPlayer()` → calls `socket.disconnect()`
+  - `registerPlayer()` → emits **`register_player`**
 
-SERVER (Express + Socket.IO)
- ├── gameState.js → holds players, moves, mappings
- ├── handlers/
- │    ├── handlePlayerMove(socket, io, move)
- │    ├── handleNewRound(io)
- │    ├── handleDisconnectPlayer(socket, io)
- │    └── handleRegisterPlayer(socket, io, playerId)
- │
- └── server.js
-      ├── io.on("connection")
-      │    ├── socket.on("player_move", ...)
-      │    ├── socket.on("new_round", ...)
-      │    ├── socket.on("register_player", ...)
-      │    └── socket.on("disconnect", ...) built-in
-      └── emits updates: "round_result", "new_round", "current_players", "player_disconnected"
+- **useEffect** (listens for server events):
+  - **`round_result`** → update result UI
+  - **`new_round`** → reset UI
+  - **`current_players`** → update player list
+  - **`player_disconnected`** → show disconnect message
+
+- **UI** renders based on `playerState`:
+  - `waiting_for_connection`
+  - `select_move`
+  - `waiting_for_opponent`
+  - `show_result`
+  - `player_disconnected`
+
+---
+
+### **Server (Express + Socket.IO)**
+- **gameState.js** → holds:
+  - `players` (playerId → socketId)
+  - `moves` (playerId → move)
+  - `socketToPlayerId` (socketId → playerId)
+  - `connectionCount` (playerId → number of connections)
+
+- **Handlers**:
+  - `handlePlayerMove(socket, io, move)`
+  - `handleNewRound(io)`
+  - `handleDisconnectPlayer(socket, io)`
+  - `handleRegisterPlayer(socket, io, playerId)`
+
+- **server.js**:
+  - `io.on("connection")`:
+    - `socket.on("player_move", ...)`
+    - `socket.on("new_round", ...)`
+    - `socket.on("register_player", ...)`
+    - `socket.on("disconnect", ...)` *(built-in)*
+
+- **Server emits**:
+  - `round_result`
+  - `new_round`
+  - `current_players`
+  - `player_disconnected`
+
+---
+
+### ✅ **Event Flow**
+```text
+Client emits → Server handles → Server emits → Client listens
