@@ -5,7 +5,7 @@ import gameState from "../gameState.js";
  * @param {*} socket - The socket of the disconnected player.
  * @param {*} io - The socket.io instance.
  */
-export default function handleDisconnect(socket, io) {
+export default function handleDisconnectPlayer(socket, io) {
   const playerId = gameState.socketToPlayerId[socket.id];
   if (!playerId) return;
 
@@ -16,6 +16,7 @@ export default function handleDisconnect(socket, io) {
     delete gameState.moves[playerId];
     delete gameState.connectionCount[playerId];
     delete gameState.socketToPlayerId[socket.id];
-    io.emit("player_left", { players: Object.keys(gameState.players) });
+    io.emit("player_disconnected", { players: Object.keys(gameState.players) });
   }
+
 }

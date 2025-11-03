@@ -3,11 +3,11 @@ import next from "next";
 import http from "http";
 import { Server } from "socket.io";
 
-import handlePlayerMove from "./server/handlers/playerMoveHandler.js";
-import handleNewRound from "./server/handlers/newRoundHandler.js";
-import handleDisconnect from "./server/handlers/disconnectHandler.js";
-import handleConnect from "./server/handlers/connectHandler.js";
-import gameState from "./server/gameState.js";
+import handlePlayerMove from "./handlers/playerMoveHandler.js";
+import handleNewRound from "./handlers/newRoundHandler.js";
+import handleDisconnectPlayer from "./handlers/disconnectHandler.js";
+import handleRegisterPlayer from "./handlers/registerPlayerHandler.js";
+import gameState from "./gameState.js";
 
 gameState.players = {};
 gameState.moves = {};
@@ -29,8 +29,8 @@ app.prepare().then(() => {
 
     socket.on("player_move", (move) => handlePlayerMove(socket, io, move));
     socket.on("new_round", () => handleNewRound(io));
-    socket.on("disconnect", () => handleDisconnect(socket, io));
-    socket.on("register_player", ({playerId}) => handleConnect(socket, io, playerId));
+    socket.on("disconnect", () => handleDisconnectPlayer(socket, io));
+    socket.on("register_player", ({playerId}) => handleRegisterPlayer(socket, io, playerId));
   });
 
   expressApp.use((req, res) => handle(req, res));
