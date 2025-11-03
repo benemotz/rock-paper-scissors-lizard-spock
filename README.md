@@ -5,7 +5,7 @@
 **Motz, Bénédicte**
 
 ## Description
-This is a real-time multiplayer game based on the extended Rock Paper Scissors Lizard Spock rules. It is built using **Next.js** for the frontend and **Express + Socket.IO** for the backend. Players connect, select their moves, and receive instant feedback on the outcome of each round.
+This is a real-time multiplayer game based on the extended Rock Paper Scissors Lizard Spock rules. It is built using **Next.js** (but not using the specific functionalities of nextJs) for the frontend and **Express + Socket.IO** for the backend. Players connect, select their moves, and receive instant feedback on the outcome of each round.
 
 ## Features
 - Real-time communication using Socket.IO
