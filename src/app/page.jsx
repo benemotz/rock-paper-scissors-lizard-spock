@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import socket from "../lib/socket.js";
-import { fetchers } from "../socketActions/socketActions.js";
+import { socketActions } from "../socketActions/socketActions.js";
 import Image from "next/image.js";
 import "./styles/page.css";
 
@@ -9,11 +9,11 @@ export default function Home() {
   const selectMoveState = "select_move";
   const newRoundState = "new_round";
   const roundResultState = "round_result";
-  const currentPLayerState = "current_players";
+  const currentPLayerState = "current_players";  
+  const playerLeftState = "player_disconnected";
   const waitingForConnectionState = "waiting_for_connection";
   const showResultState = "show_result";
   const waitingForOpponentState = "waiting_for_opponent";
-  const playerLeftState = "player_left";
 
   const [result, setResult] = useState(null);
   const [rule, setRule] = useState("");
@@ -37,7 +37,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    socket.emit("register_player", { playerId });
+    socketActions.registerPlayer(playerId);
 
     socket.on(roundResultState, (data) => {
       setResult(data.results[playerId]);
@@ -52,11 +52,11 @@ export default function Home() {
     });
 
     socket.on(currentPLayerState, (data) => {
-      console.log("Current players:", data.players, data.results, data.ruleTexts);
       getWaitingToConnectState(data);
     });
 
     socket.on(playerLeftState, () => {
+      console.log("A player has disconnected. Client emits 'player_disconnected'");
       setPlayerState(playerLeftState);
     });
 
@@ -65,7 +65,7 @@ export default function Home() {
       socket.off(newRoundState);
       socket.off(currentPLayerState);
       socket.off(playerLeftState);
-      socket.disconnect();
+      socketActions.disconnectPlayer();
     };
   }, [playerId]);
 
@@ -79,7 +79,7 @@ export default function Home() {
               className="choice-button"
               key={move}
               onClick={() => {
-                fetchers.sendMove(move);
+                socketActions.sendMove(move);
                 setPlayerState(waitingForOpponentState);
               }}
             >
@@ -108,7 +108,7 @@ export default function Home() {
         <>
           <h3>{result}</h3>
           <p>{rule}</p>
-          <button onClick={fetchers.startNewRound}>New Round</button>
+          <button onClick={socketActions.startNewRound}>New Round</button>
         </>
       )}
     </div>

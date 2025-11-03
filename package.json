@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "server": "nodemon server.js"
+    "server": "nodemon server/server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
