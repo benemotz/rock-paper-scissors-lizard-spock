@@ -4,20 +4,12 @@ import socket from "../lib/socket.js";
 import { socketActions } from "../socketActions/socketActions.js";
 import Image from "next/image.js";
 import "./styles/page.css";
+import { EVENTS, STATES } from "../lib/constants.js";
 
 export default function Home() {
-  const selectMoveState = "select_move";
-  const newRoundState = "new_round";
-  const roundResultState = "round_result";
-  const currentPLayerState = "current_players";  
-  const playerLeftState = "player_disconnected";
-  const waitingForConnectionState = "waiting_for_connection";
-  const showResultState = "show_result";
-  const waitingForOpponentState = "waiting_for_opponent";
-
   const [result, setResult] = useState(null);
   const [rule, setRule] = useState("");
-  const [playerState, setPlayerState] = useState(waitingForConnectionState);
+  const [playerState, setPlayerState] = useState(STATES.WAITING_FOR_CONNECTION);
 
   const playerId = useMemo(() => {
     if (typeof window === "undefined") return null;
@@ -31,40 +23,39 @@ export default function Home() {
 
   const getWaitingToConnectState = (data) => {
     if (data.players.length === 1) {
-      return setPlayerState(waitingForConnectionState);
+      return setPlayerState(STATES.WAITING_FOR_CONNECTION);
     }
-    return setPlayerState(selectMoveState);
+    return setPlayerState(STATES.SELECT_MOVE);
   };
 
   useEffect(() => {
     socketActions.registerPlayer(playerId);
 
-    socket.on(roundResultState, (data) => {
+    socket.on(EVENTS.ROUND_RESULT, (data) => {
       setResult(data.results[playerId]);
       setRule(data.ruleTexts[playerId]);
-      setPlayerState(showResultState);
+      setPlayerState(STATES.SHOW_RESULT);
     });
 
-    socket.on(newRoundState, () => {
+    socket.on(EVENTS.NEW_ROUND, () => {
       setResult(null);
       setRule("");
-      setPlayerState(selectMoveState);
+      setPlayerState(STATES.SELECT_MOVE);
     });
 
-    socket.on(currentPLayerState, (data) => {
+    socket.on(EVENTS.CURRENT_PLAYERS, (data) => {
       getWaitingToConnectState(data);
     });
 
-    socket.on(playerLeftState, () => {
-      console.log("A player has disconnected. Client emits 'player_disconnected'");
-      setPlayerState(playerLeftState);
+    socket.on(EVENTS.PLAYER_DISCONNECTED, () => {
+      setPlayerState(EVENTS.PLAYER_DISCONNECTED);
     });
 
     return () => {
-      socket.off(roundResultState);
-      socket.off(newRoundState);
-      socket.off(currentPLayerState);
-      socket.off(playerLeftState);
+      socket.off(EVENTS.ROUND_RESULT);
+      socket.off(EVENTS.NEW_ROUND);
+      socket.off(EVENTS.CURRENT_PLAYERS);
+      socket.off(EVENTS.PLAYER_DISCONNECTED);
       socketActions.disconnectPlayer();
     };
   }, [playerId]);
@@ -73,14 +64,14 @@ export default function Home() {
     <div className="container">
       <h2>Rock Paper Scissors Lizard Spock</h2>
       <div className="button-wrapper">
-        {playerState === selectMoveState &&
+        {playerState === STATES.SELECT_MOVE &&
           ["Rock", "Paper", "Scissors", "Lizard", "Spock"].map((move) => (
             <button
               className="choice-button"
               key={move}
               onClick={() => {
                 socketActions.sendMove(move);
-                setPlayerState(waitingForOpponentState);
+                setPlayerState(STATES.WAITING_FOR_OPPONENT);
               }}
             >
               <Image
@@ -94,17 +85,17 @@ export default function Home() {
           ))}
       </div>
 
-      {playerState === playerLeftState && (
+      {playerState === EVENTS.PLAYER_DISCONNECTED && (
         <p>`Player ${socket.id} disconnected...`</p>
       )}
 
-      {playerState === waitingForConnectionState && (
+      {playerState === STATES.WAITING_FOR_CONNECTION && (
         <p>Waiting for another player to connect...</p>
       )}
-      {playerState === waitingForOpponentState && (
+      {playerState === STATES.WAITING_FOR_OPPONENT && (
         <p>Waiting for other player...</p>
       )}
-      {playerState === showResultState && (
+      {playerState === STATES.SHOW_RESULT && (
         <>
           <h3>{result}</h3>
           <p>{rule}</p>
