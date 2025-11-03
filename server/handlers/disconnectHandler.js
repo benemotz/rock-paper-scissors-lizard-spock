@@ -1,4 +1,5 @@
 import gameState from "../gameState.js";
+import { EVENTS } from "../../src/lib/constants.js";
 
 /**
  * Handles a player's disconnection from the game.
@@ -16,7 +17,7 @@ export default function handleDisconnectPlayer(socket, io) {
     delete gameState.moves[playerId];
     delete gameState.connectionCount[playerId];
     delete gameState.socketToPlayerId[socket.id];
-    io.emit("player_disconnected", { players: Object.keys(gameState.players) });
+    io.emit(EVENTS.PLAYER_DISCONNECTED, { players: Object.keys(gameState.players) });
   }
 
 }

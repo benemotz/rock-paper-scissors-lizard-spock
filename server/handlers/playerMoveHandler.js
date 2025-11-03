@@ -1,5 +1,6 @@
 import gameState from "../gameState.js";
 import getOutcome from "../rules.js";
+import { EVENTS } from "../../src/lib/constants.js";
 
 /**
  * Handles a player's move in the game.
@@ -22,7 +23,7 @@ export default function handlePlayerMove(socket, io, move) {
     const { result: result1, rule: ruleText1 } = getOutcome(move1, move2);
     const { result: result2, rule: ruleText2 } = getOutcome(move2, move1);
 
-    io.emit("round_result", {
+    io.emit(EVENTS.ROUND_RESULT, {
       moves: { [player1]: move1, [player2]: move2 },
       results: { [player1]: result1, [player2]: result2 },
       ruleTexts: { [player1]: ruleText1, [player2]: ruleText2 },

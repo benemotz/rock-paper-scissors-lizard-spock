@@ -1,8 +1,10 @@
+
+
+import { Server } from "socket.io";
+import { EVENTS } from "../src/lib/constants.js";
 import express from "express";
 import next from "next";
 import http from "http";
-import { Server } from "socket.io";
-
 import handlePlayerMove from "./handlers/playerMoveHandler.js";
 import handleNewRound from "./handlers/newRoundHandler.js";
 import handleDisconnectPlayer from "./handlers/disconnectHandler.js";
@@ -27,10 +29,10 @@ app.prepare().then(() => {
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
-    socket.on("player_move", (move) => handlePlayerMove(socket, io, move));
-    socket.on("new_round", () => handleNewRound(io));
-    socket.on("disconnect", () => handleDisconnectPlayer(socket, io));
-    socket.on("register_player", ({playerId}) => handleRegisterPlayer(socket, io, playerId));
+    socket.on(EVENTS.PLAYER_MOVE, (move) => handlePlayerMove(socket, io, move));
+    socket.on(EVENTS.NEW_ROUND, () => handleNewRound(io));
+    socket.on(EVENTS.DISCONNECT, () => handleDisconnectPlayer(socket, io));
+    socket.on(EVENTS.REGISTER_PLAYER, ({playerId}) => handleRegisterPlayer(socket, io, playerId));
   });
 
   expressApp.use((req, res) => handle(req, res));
