@@ -6,7 +6,16 @@ import gameState from "../gameState.js";
  * @param {*} io - The socket.io instance.
  */
 export default function handleDisconnect(socket, io) {
-  delete gameState.players[socket.id];
-  delete gameState.moves[socket.id];
-  io.emit("player_left", { players: Object.keys(gameState.players) });
+  const playerId = gameState.socketToPlayerId[socket.id];
+  if (!playerId) return;
+
+  gameState.connectionCount[playerId] -= 1;
+
+  if (gameState.connectionCount[playerId] <= 0) {
+    delete gameState.players[playerId];
+    delete gameState.moves[playerId];
+    delete gameState.connectionCount[playerId];
+    delete gameState.socketToPlayerId[socket.id];
+    io.emit("player_left", { players: Object.keys(gameState.players) });
+  }
 }

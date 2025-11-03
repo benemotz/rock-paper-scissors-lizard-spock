@@ -1,6 +1,8 @@
 const gameState = {
   players: {},
   moves: {},
+  socketToPlayerId: {},
+  connectionCount: {},
 };
 
-module.exports = gameState;
+export default gameState;

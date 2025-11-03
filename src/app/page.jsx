@@ -1,51 +1,110 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import socket from "../lib/socket.js";
-import { fetchers } from "../helpers/fetchers.js";
+import { fetchers } from "../socketActions/socketActions.js";
+import Image from "next/image.js";
+import "./styles/page.css";
 
 export default function Home() {
+  const selectMoveState = "select_move";
+  const newRoundState = "new_round";
+  const roundResultState = "round_result";
+  const currentPLayerState = "current_players";
+  const waitingForConnectionState = "waiting_for_connection";
+  const showResultState = "show_result";
+  const waitingForOpponentState = "waiting_for_opponent";
+  const playerLeftState = "player_left";
+
   const [result, setResult] = useState(null);
   const [rule, setRule] = useState("");
-  const [playerState, setPlayerState] = useState("select_move");
+  const [playerState, setPlayerState] = useState(waitingForConnectionState);
+
+  const playerId = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    let id = localStorage.getItem("playerId");
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("playerId", id);
+    }
+    return id;
+  }, []);
+
+  const getWaitingToConnectState = (data) => {
+    if (data.players.length === 1) {
+      return setPlayerState(waitingForConnectionState);
+    }
+    return setPlayerState(selectMoveState);
+  };
 
   useEffect(() => {
-    socket.on("round_result", (data) => {
-      setResult(data.results[socket.id]);
-      setRule(data.ruleTexts[socket.id]);
-      setPlayerState("show_result");
+    socket.emit("register_player", { playerId });
+
+    socket.on(roundResultState, (data) => {
+      setResult(data.results[playerId]);
+      setRule(data.ruleTexts[playerId]);
+      setPlayerState(showResultState);
     });
 
-    socket.on("new_round", () => {
+    socket.on(newRoundState, () => {
       setResult(null);
       setRule("");
-      setPlayerState("select_move");
+      setPlayerState(selectMoveState);
+    });
+
+    socket.on(currentPLayerState, (data) => {
+      console.log("Current players:", data.players, data.results, data.ruleTexts);
+      getWaitingToConnectState(data);
+    });
+
+    socket.on(playerLeftState, () => {
+      setPlayerState(playerLeftState);
     });
 
     return () => {
-      socket.off("round_result");
-      socket.off("new_round");
+      socket.off(roundResultState);
+      socket.off(newRoundState);
+      socket.off(currentPLayerState);
+      socket.off(playerLeftState);
+      socket.disconnect();
     };
-  }, []);
+  }, [playerId]);
 
   return (
-    <div>
+    <div className="container">
       <h2>Rock Paper Scissors Lizard Spock</h2>
-      {playerState === "select_move" &&
-        ["Rock", "Paper", "Scissors", "Lizard", "Spock"].map((move) => (
-          <button
-            key={move}
-            onClick={() => {
-              fetchers.sendMove(move);
-              setPlayerState("waiting_for_opponent");
-            }}
-          >
-            {move}
-          </button>
-        ))}
-      {playerState === "waiting_for_opponent" && (
+      <div className="button-wrapper">
+        {playerState === selectMoveState &&
+          ["Rock", "Paper", "Scissors", "Lizard", "Spock"].map((move) => (
+            <button
+              className="choice-button"
+              key={move}
+              onClick={() => {
+                fetchers.sendMove(move);
+                setPlayerState(waitingForOpponentState);
+              }}
+            >
+              <Image
+                src={`/icons/${move}.png`}
+                alt={move}
+                className="move-icon"
+                width={50}
+                height={50}
+              />
+            </button>
+          ))}
+      </div>
+
+      {playerState === playerLeftState && (
+        <p>`Player ${socket.id} disconnected...`</p>
+      )}
+
+      {playerState === waitingForConnectionState && (
+        <p>Waiting for another player to connect...</p>
+      )}
+      {playerState === waitingForOpponentState && (
         <p>Waiting for other player...</p>
       )}
-      {playerState === "show_result" && (
+      {playerState === showResultState && (
         <>
           <h3>{result}</h3>
           <p>{rule}</p>

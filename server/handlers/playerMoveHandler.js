@@ -9,8 +9,10 @@ import getOutcome from "../rules.js";
  */
 
 export default function handlePlayerMove(socket, io, move) {
-  gameState.players[socket.id] = true;
-  gameState.moves[socket.id] = move;
+  const playerId = gameState.socketToPlayerId[socket.id];
+  if (!playerId) return;
+
+  gameState.moves[playerId] = move;
 
   if (Object.keys(gameState.moves).length === 2) {
     const [player1, player2] = Object.keys(gameState.moves);

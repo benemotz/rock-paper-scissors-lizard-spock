@@ -6,6 +6,12 @@ import { Server } from "socket.io";
 import handlePlayerMove from "./server/handlers/playerMoveHandler.js";
 import handleNewRound from "./server/handlers/newRoundHandler.js";
 import handleDisconnect from "./server/handlers/disconnectHandler.js";
+import handleConnect from "./server/handlers/connectHandler.js";
+import gameState from "./server/gameState.js";
+
+gameState.players = {};
+gameState.moves = {};
+
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -24,6 +30,7 @@ app.prepare().then(() => {
     socket.on("player_move", (move) => handlePlayerMove(socket, io, move));
     socket.on("new_round", () => handleNewRound(io));
     socket.on("disconnect", () => handleDisconnect(socket, io));
+    socket.on("register_player", ({playerId}) => handleConnect(socket, io, playerId));
   });
 
   expressApp.use((req, res) => handle(req, res));

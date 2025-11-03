@@ -4,4 +4,5 @@ import socket from "../lib/socket.js";
  */
 export default function disconnectPlayer() {
   socket.disconnect();
+  localStorage.clear();
 }

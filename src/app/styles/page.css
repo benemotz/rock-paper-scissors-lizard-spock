@@ -1,0 +1,53 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+}
+
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.choice-button {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 10px 16px;
+  margin: 8px;
+  font-size: 1rem;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.state-message {
+  font-size: 1.2rem;
+  color: #444;
+  margin-top: 20px;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.state-message.waiting {
+  color: #0070f3;
+}
+
+.state-message.disconnected {
+  color: #ff4d4f;
+}
+
+.state-message.result {
+  color: #28a745;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
