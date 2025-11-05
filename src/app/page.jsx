@@ -86,18 +86,18 @@ export default function Home() {
       </div>
 
       {playerState === EVENTS.PLAYER_DISCONNECTED && (
-        <p>`Player ${socket.id} disconnected...`</p>
+        <p className="state-message disconnected">`Player ${socket.id} disconnected...`</p>
       )}
 
       {playerState === STATES.WAITING_FOR_CONNECTION && (
-        <p>Waiting for another player to connect...</p>
+        <p className="state-message waiting">Waiting for another player to connect...</p>
       )}
       {playerState === STATES.WAITING_FOR_OPPONENT && (
-        <p>Waiting for other player...</p>
+        <p className="state-message waiting">Waiting for other player...</p>
       )}
       {playerState === STATES.SHOW_RESULT && (
         <>
-          <h3>{result}</h3>
+          <h3 className="state-message result">{result}</h3>
           <p>{rule}</p>
           <button onClick={socketActions.startNewRound}>New Round</button>
         </>
